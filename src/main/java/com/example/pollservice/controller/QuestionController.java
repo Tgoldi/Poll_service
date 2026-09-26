@@ -18,7 +18,7 @@ public class QuestionController {
 
     // POST endpoint to create a new question
     @PostMapping
-    public ResponseEntity<Question> createQuestion(@RequestBody Question question) {
+    public ResponseEntity<Question> createQuestion(@jakarta.validation.Valid @RequestBody Question question) {
         Question savedQuestion = questionService.saveQuestion(question);
         return new ResponseEntity<>(savedQuestion, HttpStatus.CREATED);
     }
