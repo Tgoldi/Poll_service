@@ -1,6 +1,7 @@
 package com.example.pollservice.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -12,18 +13,23 @@ public class Question {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank
     @Column(nullable = false)
     private String title;
 
+    @NotBlank
     @Column(nullable = false)
     private String optionA;
 
+    @NotBlank
     @Column(nullable = false)
     private String optionB;
 
+    @NotBlank
     @Column(nullable = false)
     private String optionC;
 
+    @NotBlank
     @Column(nullable = false)
     private String optionD;
 
