@@ -3,10 +3,13 @@ package com.example.pollservice.controller;
 import com.example.pollservice.model.Question;
 import com.example.pollservice.service.QuestionService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.util.List;
 
 @RestController
@@ -15,6 +18,10 @@ public class QuestionController {
 
     @Autowired
     private QuestionService questionService;
+
+    // Admin token read from configuration (property: app.admin.token). If unset, deletion is denied.
+    @Value("${app.admin.token:}")
+    private String adminToken;
 
     // POST endpoint to create a new question
     @PostMapping
@@ -40,7 +47,14 @@ public class QuestionController {
 
     // DELETE endpoint to remove a question by ID
     @DeleteMapping("/{id}")
-    public ResponseEntity<HttpStatus> deleteQuestion(@PathVariable Long id) {
+    public ResponseEntity<HttpStatus> deleteQuestion(@PathVariable Long id,
+            @RequestHeader(value = "X-Admin-Token", required = false) String providedToken) {
+        if (adminToken == null || adminToken.isEmpty() || providedToken == null
+                || !MessageDigest.isEqual(
+                        adminToken.getBytes(StandardCharsets.UTF_8),
+                        providedToken.getBytes(StandardCharsets.UTF_8))) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
         try {
             questionService.deleteQuestion(id);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
