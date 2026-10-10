@@ -3,10 +3,13 @@ package com.example.pollservice.controller;
 import com.example.pollservice.model.Question;
 import com.example.pollservice.service.QuestionService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.util.List;
 
 @RestController
@@ -15,6 +18,19 @@ public class QuestionController {
 
     @Autowired
     private QuestionService questionService;
+
+    // Admin API key required for destructive operations; must be set via configuration.
+    @Value("${poll.admin.api-key:}")
+    private String adminApiKey;
+
+    private boolean isAdmin(String providedKey) {
+        if (adminApiKey == null || adminApiKey.isEmpty() || providedKey == null) {
+            return false;
+        }
+        return MessageDigest.isEqual(
+                adminApiKey.getBytes(StandardCharsets.UTF_8),
+                providedKey.getBytes(StandardCharsets.UTF_8));
+    }
 
     // POST endpoint to create a new question
     @PostMapping
@@ -40,7 +56,11 @@ public class QuestionController {
 
     // DELETE endpoint to remove a question by ID
     @DeleteMapping("/{id}")
-    public ResponseEntity<HttpStatus> deleteQuestion(@PathVariable Long id) {
+    public ResponseEntity<HttpStatus> deleteQuestion(@PathVariable Long id,
+            @RequestHeader(value = "X-Admin-Api-Key", required = false) String apiKey) {
+        if (!isAdmin(apiKey)) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
         try {
             questionService.deleteQuestion(id);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
