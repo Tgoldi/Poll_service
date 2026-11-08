@@ -19,6 +19,19 @@ public class ResponseService {
         return responseRepository.save(response);
     }
 
+    /**
+     * Saves a new response unless this user already answered this question.
+     * Returns null when a response from the same user to the same question exists.
+     */
+    public synchronized Response saveNewResponse(Response response) {
+        Long questionId = response.getQuestion() == null ? null : response.getQuestion().getId();
+        if (questionId != null && response.getUserId() != null
+                && responseRepository.existsByQuestion_IdAndUserId(questionId, response.getUserId())) {
+            return null;
+        }
+        return responseRepository.save(response);
+    }
+
     // Method to fetch all responses
     public List<Response> getAllResponses() {
         return responseRepository.findAll();

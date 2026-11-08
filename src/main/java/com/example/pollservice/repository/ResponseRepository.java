@@ -7,4 +7,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ResponseRepository extends JpaRepository<Response, Long> {
     // Additional queries to fetch responses by question or user could be added here
+
+    boolean existsByQuestion_IdAndUserId(Long questionId, Long userId);
 }
