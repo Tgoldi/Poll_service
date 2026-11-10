@@ -1,6 +1,7 @@
 package com.example.pollservice.controller;
 
 import com.example.pollservice.model.Question;
+import com.example.pollservice.security.AdminOnly;
 import com.example.pollservice.service.QuestionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,6 +18,7 @@ public class QuestionController {
     private QuestionService questionService;
 
     // POST endpoint to create a new question
+    @AdminOnly
     @PostMapping
     public ResponseEntity<Question> createQuestion(@RequestBody Question question) {
         Question savedQuestion = questionService.saveQuestion(question);
@@ -39,6 +41,7 @@ public class QuestionController {
     }
 
     // DELETE endpoint to remove a question by ID
+    @AdminOnly
     @DeleteMapping("/{id}")
     public ResponseEntity<HttpStatus> deleteQuestion(@PathVariable Long id) {
         try {
